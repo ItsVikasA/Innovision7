@@ -8,7 +8,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     secret: process.env.NEXTAUTH_SECRET,
-    debug: true, // Enable debug mode
+    debug: false,
     providers: [
         GitHubProvider({
             clientId: process.env.GITHUB_ID,

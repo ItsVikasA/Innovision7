@@ -34,7 +34,7 @@ export async function middleware(req) {
 
     const authtoken = await auth();
 
-    if (!authtoken) {
+    if (!authtoken && pathname !== "/unauthorized") {
         return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
@@ -48,6 +48,8 @@ export const config = {
         "/generate/:path*",
         "/chapter-test/:path*",
         "/roadmap/:path*",
+        "/studio/:path*",
+        "/gamification/:path*",
         "/api/user/:path*",
     ],
 };

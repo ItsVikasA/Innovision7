@@ -49,7 +49,7 @@ function parseJson(response) {
 async function generateRoadmap(prompt, id, session, user_prompt) {
   try {
     const response = await openai.chat.completions.create({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       messages: [
         {
           role: "system",

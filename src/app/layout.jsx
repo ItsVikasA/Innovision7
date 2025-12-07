@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import LoaderProvider from "@/components/ui/Custom/ToastLoader";
 import { SessionProvider } from "next-auth/react";
 import { XpProvider } from "@/contexts/xp";
+import OfflineIndicator from "@/components/OfflineIndicator";
 
 const robotoSans = Roboto({
   variable: "--font-roboto-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
             <LoaderProvider>
               <Navbar />
               <main className="pt-16 relative">{children}</main>
+              <OfflineIndicator />
               <Toaster richColors />
             </LoaderProvider>
           </XpProvider>

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { User, LogIn } from "lucide-react";
+import { User, LogIn, Palette, Trophy, BarChart3, Upload, Flame, Sparkles, Code2, Youtube, BookOpen } from "lucide-react";
 import { CgDetailsMore } from "react-icons/cg";
 import { authenti } from "./new";
 import { Sun, Moon } from "lucide-react";
@@ -21,6 +21,7 @@ const Navbar = () => {
   const [session, setSession] = useState(null);
   const [sidebar, setSidebar] = useState(false);
   const [theme, setTheme] = useState("light"); // Default theme: light
+  const [streak, setStreak] = useState(0);
   const { xp, show, changed } = useContext(xpContext);
   const router = useRouter();
   const pathname = usePathname();
@@ -49,6 +50,17 @@ const Navbar = () => {
     const fetchSession = async () => {
       let session = await authenti();
       setSession(session);
+      
+      // Fetch streak if user is logged in
+      if (session?.user?.email) {
+        try {
+          const res = await fetch(`/api/gamification/stats?userId=${session.user.email}`);
+          const data = await res.json();
+          setStreak(data.streak || 0);
+        } catch (error) {
+          console.error("Error fetching streak:", error);
+        }
+      }
     };
     fetchSession();
   }, []);
@@ -155,6 +167,109 @@ const Navbar = () => {
                     </li>
                     <li onClick={() => setSidebar(false)}>
                       <Link 
+                        href="/courses"
+                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
+                          pathname?.startsWith("/courses") 
+                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
+                            : ""
+                        }`}
+                      >
+                        <BookOpen className="h-4 w-4" />
+                        Courses
+                      </Link>
+                    </li>
+                    <li onClick={() => setSidebar(false)}>
+                      <Link 
+                        href="/studio"
+                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
+                          isActiveLink("/studio") 
+                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
+                            : ""
+                        }`}
+                      >
+                        <Palette className="h-4 w-4" />
+                        Studio
+                      </Link>
+                    </li>
+                    <li onClick={() => setSidebar(false)}>
+                      <Link 
+                        href="/gamification"
+                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
+                          isActiveLink("/gamification") 
+                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
+                            : ""
+                        }`}
+                      >
+                        <Trophy className="h-4 w-4" />
+                        Gamification
+                      </Link>
+                    </li>
+                    <li onClick={() => setSidebar(false)}>
+                      <Link 
+                        href="/research"
+                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
+                          isActiveLink("/research") 
+                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
+                            : ""
+                        }`}
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                        Research
+                      </Link>
+                    </li>
+                    <li onClick={() => setSidebar(false)}>
+                      <Link 
+                        href="/content-ingestion"
+                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
+                          isActiveLink("/content-ingestion") 
+                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
+                            : ""
+                        }`}
+                      >
+                        <Upload className="h-4 w-4" />
+                        Content Ingestion
+                      </Link>
+                    </li>
+                    <li onClick={() => setSidebar(false)}>
+                      <Link 
+                        href="/code-editor"
+                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
+                          isActiveLink("/code-editor") 
+                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
+                            : ""
+                        }`}
+                      >
+                        <Code2 className="h-4 w-4" />
+                        Code Editor
+                      </Link>
+                    </li>
+                    <li onClick={() => setSidebar(false)}>
+                      <Link 
+                        href="/youtube-course"
+                        className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
+                          isActiveLink("/youtube-course") 
+                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
+                            : ""
+                        }`}
+                      >
+                        <Youtube className="h-4 w-4" />
+                        YouTube Course
+                      </Link>
+                    </li>
+                    <li onClick={() => setSidebar(false)}>
+                      <Link 
+                        href="/features"
+                        className={`block py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
+                          pathname?.startsWith("/features") 
+                            ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500" 
+                            : ""
+                        }`}
+                      >
+                        Features
+                      </Link>
+                    </li>
+                    <li onClick={() => setSidebar(false)}>
+                      <Link 
                         href="/demo"
                         className={`block py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-100/80 ${
                           isActiveLink("/demo") 
@@ -180,9 +295,11 @@ const Navbar = () => {
                   </ul>
 
                   {/* Google Translate */}
-                  <div className="mt-4 ml-4 pt-4">
-                    <p className="text-sm text-gray-600 mb-2">Translate:</p>
-                    <GoogleTranslate />
+                  <div className="mt-4 ml-4 pt-4 border-t border-slate-200/50">
+                    <div className="py-2 px-3">
+                      <p className="text-sm font-medium mb-2">Translate</p>
+                      <GoogleTranslate />
+                    </div>
                   </div>
                 </nav>
               ) : (
@@ -302,38 +419,46 @@ const Navbar = () => {
             <h2 className="text-xl md:text-3xl font-extrabold">InnoVision</h2>
           </Link>
         </div>
-        <div className="flex items-center sm:w-[152px] w-22 justify-center">
+        <div className="flex items-center gap-2 sm:w-auto w-22 justify-center">
           {session && (
-            <div className="mr-2 flex gap-3 relative rounded-2xl border-2 px-4 py-2">
-              xp{""} 
-              <span className="text-green-900 dark:text-green-400 font-bold">
-                {xp}
-                {show && (
-                  <AnimatePresence>
-                    <motion.div
-                      initial={{
-                        opacity: 0,
-                        scale: 0.5,
-                        y: 10,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        scale: 1,
-                        y: 0,
-                      }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeOut",
-                      }}
-                      className="absolute text-green-600 right-0 w-7"
-                    >
-                      <p>+{changed}</p>
-                    </motion.div>
-                  </AnimatePresence>
-                )}
-              </span>
-            </div>
+            <>
+              <div className="flex gap-2 items-center relative rounded-2xl border-2 px-4 py-2 border-green-500/50 bg-green-50/50 dark:bg-green-950/20">
+                <Sparkles className="h-4 w-4 text-green-500" />
+                <span className="text-green-900 dark:text-green-400 font-bold">
+                  {xp}
+                  {show && (
+                    <AnimatePresence>
+                      <motion.div
+                        initial={{
+                          opacity: 0,
+                          scale: 0.5,
+                          y: 10,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          scale: 1,
+                          y: 0,
+                        }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{
+                          duration: 0.3,
+                          ease: "easeOut",
+                        }}
+                        className="absolute text-green-600 right-0 w-7"
+                      >
+                        <p>+{changed}</p>
+                      </motion.div>
+                    </AnimatePresence>
+                  )}
+                </span>
+              </div>
+              <div className="flex gap-2 items-center rounded-2xl border-2 px-4 py-2 border-orange-500/50 bg-orange-50/50 dark:bg-orange-950/20">
+                <Flame className="h-4 w-4 text-orange-500" />
+                <span className="text-orange-600 dark:text-orange-400 font-bold">
+                  {streak}
+                </span>
+              </div>
+            </>
           )}
           <div className="max-sm:hidden flex items-center gap-2">
             <Button

@@ -1,8 +1,29 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Calendar, Clock, Flag, GraduationCap, Loader2 } from "lucide-react";
+import { Calendar, Clock, Flag, GraduationCap, Loader2, BookOpen, Sparkles, Check, ChevronsUpDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { KARNATAKA_COLLEGES, ENGINEERING_BRANCHES, SEMESTERS } from "@/lib/engineering-data";
+import { BRANCH_SUBJECTS } from "@/lib/engineering-subjects";
+import { BRANCH_SUBJECTS_PART1 } from "@/lib/engineering-subjects-part1";
+import { BRANCH_SUBJECTS_PART2 } from "@/lib/engineering-subjects-part2";
+import { BRANCH_SUBJECTS_PART3 } from "@/lib/engineering-subjects-part3";
+import { BRANCH_SUBJECTS_PART4 } from "@/lib/engineering-subjects-part4";
+import { BRANCH_SUBJECTS_PART5 } from "@/lib/engineering-subjects-part5";
+
+// Merge all branch subjects
+const ALL_BRANCH_SUBJECTS = {
+    ...BRANCH_SUBJECTS,
+    ...BRANCH_SUBJECTS_PART1,
+    ...BRANCH_SUBJECTS_PART2,
+    ...BRANCH_SUBJECTS_PART3,
+    ...BRANCH_SUBJECTS_PART4,
+    ...BRANCH_SUBJECTS_PART5
+};
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
     Select,
     SelectContent,
@@ -64,9 +85,193 @@ const SelectionCard = ({ options, selectedValue, onSelect, title }) => {
 
 export default function Page() {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [activeTab, setActiveTab] = useState("custom");
+    const [openCollege, setOpenCollege] = useState(false);
+    const [engineeringData, setEngineeringData] = useState({
+        college: "",
+        branch: "",
+        semester: "",
+        subject: "",
+        modules: ["", "", "", "", ""],
+        pdfFile: null
+    });
+    const [curriculumData, setCurriculumData] = useState({
+        classLevel: "",
+        board: "",
+        subject: "",
+        topics: ["", "", ""]
+    });
     const { data: session } = useSession();
     const router = useRouter();
     const { showLoader } = loader();
+
+    // Get available subjects based on selected branch and semester
+    const availableSubjects = engineeringData.branch && engineeringData.semester 
+        ? ALL_BRANCH_SUBJECTS[engineeringData.branch]?.[engineeringData.semester] || []
+        : [];
+
+    const classLevels = ["LKG", "UKG", "CLASS_1", "CLASS_2", "CLASS_3", "CLASS_4", "CLASS_5", "CLASS_6", "CLASS_7", "CLASS_8", "CLASS_9", "CLASS_10", "CLASS_11", "CLASS_12"];
+    const boards = ["CBSE", "STATE"];
+
+    const handleCurriculumSubmit = async () => {
+        if (!curriculumData.classLevel || !curriculumData.board || !curriculumData.subject) {
+            toast.error("Please fill all required fields");
+            return;
+        }
+
+        const filledTopics = curriculumData.topics.filter(t => t.trim() !== "");
+        if (filledTopics.length === 0) {
+            toast.error("Please add at least one topic");
+            return;
+        }
+
+        setIsSubmitting(true);
+        
+        const prompt = `Generate a comprehensive curriculum course for ${curriculumData.subject} for ${curriculumData.classLevel.replace('_', ' ')} (${curriculumData.board} board). 
+        Cover these topics: ${filledTopics.join(", ")}. 
+        Include detailed explanations, examples, and age-appropriate learning activities.`;
+
+        try {
+            let res = await fetch("/api/user_prompt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt, difficulty: "balanced" }),
+            });
+            const roadmapData = await res.json();
+            const id = roadmapData.id;
+
+            if (!id) {
+                toast.error("Failed to generate course");
+                setIsSubmitting(false);
+                return;
+            }
+
+            const interval = setInterval(async () => {
+                let res = await fetch(`/api/roadmap/${id}`);
+                let data = await res.json();
+                if (data.process !== "pending") {
+                    if (data.process === "completed") {
+                        toast.success("Curriculum course generated successfully");
+                        showLoader();
+                        router.push(`/roadmap/${id}`);
+                    } else {
+                        toast.error(data.message || "Failed to generate course");
+                        setIsSubmitting(false);
+                    }
+                    clearInterval(interval);
+                }
+            }, 3000);
+        } catch (error) {
+            toast.error("Error generating course");
+            setIsSubmitting(false);
+        }
+    };
+
+    const addCurriculumTopic = () => {
+        setCurriculumData(prev => ({
+            ...prev,
+            topics: [...prev.topics, ""]
+        }));
+    };
+
+    const updateCurriculumTopic = (index, value) => {
+        const newTopics = [...curriculumData.topics];
+        newTopics[index] = value;
+        setCurriculumData(prev => ({
+            ...prev,
+            topics: newTopics
+        }));
+    };
+
+    const removeCurriculumTopic = (index) => {
+        if (curriculumData.topics.length > 1) {
+            const newTopics = curriculumData.topics.filter((_, i) => i !== index);
+            setCurriculumData(prev => ({
+                ...prev,
+                topics: newTopics
+            }));
+        }
+    };
+
+    const handleEngineeringSubmit = async () => {
+        if (!engineeringData.college || !engineeringData.branch || !engineeringData.semester || !engineeringData.subject) {
+            toast.error("Please fill all required fields");
+            return;
+        }
+
+        const filledModules = engineeringData.modules.filter(m => m.trim() !== "");
+        if (filledModules.length === 0) {
+            toast.error("Please add at least one module");
+            return;
+        }
+
+        setIsSubmitting(true);
+        
+        const prompt = `Generate a comprehensive engineering course for ${engineeringData.subject} in ${engineeringData.branch}, ${engineeringData.semester} at ${engineeringData.college}. 
+        Cover these modules: ${filledModules.join(", ")}. 
+        Include detailed explanations, examples, and practical applications for each module.`;
+
+        try {
+            let res = await fetch("/api/user_prompt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt, difficulty: "balanced" }),
+            });
+            const roadmapData = await res.json();
+            const id = roadmapData.id;
+
+            if (!id) {
+                toast.error("Failed to generate course");
+                setIsSubmitting(false);
+                return;
+            }
+
+            const interval = setInterval(async () => {
+                let res = await fetch(`/api/roadmap/${id}`);
+                let data = await res.json();
+                if (data.process !== "pending") {
+                    if (data.process === "completed") {
+                        toast.success("Engineering course generated successfully");
+                        showLoader();
+                        router.push(`/roadmap/${id}`);
+                    } else {
+                        toast.error(data.message || "Failed to generate course");
+                        setIsSubmitting(false);
+                    }
+                    clearInterval(interval);
+                }
+            }, 3000);
+        } catch (error) {
+            toast.error("Error generating course");
+            setIsSubmitting(false);
+        }
+    };
+
+    const addModule = () => {
+        setEngineeringData(prev => ({
+            ...prev,
+            modules: [...prev.modules, ""]
+        }));
+    };
+
+    const updateModule = (index, value) => {
+        const newModules = [...engineeringData.modules];
+        newModules[index] = value;
+        setEngineeringData(prev => ({
+            ...prev,
+            modules: newModules
+        }));
+    };
+
+    const removeModule = (index) => {
+        if (engineeringData.modules.length > 1) {
+            const newModules = engineeringData.modules.filter((_, i) => i !== index);
+            setEngineeringData(prev => ({
+                ...prev,
+                modules: newModules
+            }));
+        }
+    };
 
     const formSchema = z.object({
         concept: z
@@ -261,7 +466,24 @@ export default function Page() {
                     </p>
                 </div>
 
-                <Card className="p-6 border-0 shadow-none">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-8">
+                        <TabsTrigger value="custom" className="flex items-center gap-2">
+                            <Sparkles className="h-4 w-4" />
+                            Custom Topic
+                        </TabsTrigger>
+                        <TabsTrigger value="curriculum" className="flex items-center gap-2">
+                            <BookOpen className="h-4 w-4" />
+                            Curriculum
+                        </TabsTrigger>
+                        <TabsTrigger value="engineering" className="flex items-center gap-2">
+                            <GraduationCap className="h-4 w-4" />
+                            Engineering
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="custom">
+                        <Card className="p-6 border-0 shadow-none">
                     <Form {...form}>
                         <form
                             onSubmit={form.handleSubmit(onSubmit , onError)}
@@ -431,6 +653,285 @@ export default function Page() {
                         </form>
                     </Form>
                 </Card>
+                    </TabsContent>
+
+                    <TabsContent value="curriculum">
+                        <Card className="p-6 border-0 shadow-none">
+                            <div className="space-y-6">
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div>
+                                        <label className="text-sm font-medium">Class Level</label>
+                                        <Select
+                                            value={curriculumData.classLevel}
+                                            onValueChange={(value) => setCurriculumData(prev => ({ ...prev, classLevel: value }))}
+                                        >
+                                            <SelectTrigger className="mt-2">
+                                                <SelectValue placeholder="Select class" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {classLevels.map(cls => (
+                                                    <SelectItem key={cls} value={cls}>{cls.replace('_', ' ')}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm font-medium">Board</label>
+                                        <Select
+                                            value={curriculumData.board}
+                                            onValueChange={(value) => setCurriculumData(prev => ({ ...prev, board: value }))}
+                                        >
+                                            <SelectTrigger className="mt-2">
+                                                <SelectValue placeholder="Select board" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {boards.map(board => (
+                                                    <SelectItem key={board} value={board}>{board}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium">Subject Name</label>
+                                    <Input
+                                        placeholder="e.g., Mathematics, Science, English"
+                                        value={curriculumData.subject}
+                                        onChange={(e) => setCurriculumData(prev => ({ ...prev, subject: e.target.value }))}
+                                        className="mt-2"
+                                    />
+                                </div>
+
+                                <Separator />
+
+                                <div>
+                                    <label className="text-sm font-medium">Topics to Cover</label>
+                                    <p className="text-xs text-muted-foreground mb-3">Define the topics for this subject</p>
+                                    <div className="space-y-2">
+                                        {curriculumData.topics.map((topic, index) => (
+                                            <div key={index} className="flex gap-2">
+                                                <Input
+                                                    placeholder={`Topic ${index + 1}`}
+                                                    value={topic}
+                                                    onChange={(e) => updateCurriculumTopic(index, e.target.value)}
+                                                    className="flex-1"
+                                                />
+                                                {curriculumData.topics.length > 1 && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => removeCurriculumTopic(index)}
+                                                    >
+                                                        ×
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={addCurriculumTopic}
+                                        className="mt-2"
+                                    >
+                                        + Add Topic
+                                    </Button>
+                                </div>
+
+                                <Button
+                                    onClick={handleCurriculumSubmit}
+                                    className="w-full"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? "Generating Course..." : "Generate Curriculum Course"}
+                                </Button>
+                            </div>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="engineering">
+                        <Card className="p-6 border-0 shadow-none">
+                            <div className="space-y-6">
+                                {/* College and Branch Selection */}
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div>
+                                        <label className="text-sm font-medium">College Name</label>
+                                        <Popover open={openCollege} onOpenChange={setOpenCollege}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    aria-expanded={openCollege}
+                                                    className="w-full justify-between mt-2 h-10"
+                                                >
+                                                    <span className="truncate">{engineeringData.college || "Search college..."}</span>
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[400px] p-0">
+                                                <Command>
+                                                    <CommandInput placeholder="Search college..." />
+                                                    <CommandEmpty>No college found.</CommandEmpty>
+                                                    <CommandGroup className="max-h-64 overflow-auto">
+                                                        {KARNATAKA_COLLEGES.map((college) => (
+                                                            <CommandItem
+                                                                key={college}
+                                                                value={college}
+                                                                onSelect={() => {
+                                                                    setEngineeringData(prev => ({ ...prev, college: college }));
+                                                                    setOpenCollege(false);
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        engineeringData.college === college ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                {college}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm font-medium">Branch</label>
+                                        <Select
+                                            value={engineeringData.branch}
+                                            onValueChange={(value) => setEngineeringData(prev => ({ ...prev, branch: value, subject: "" }))}
+                                        >
+                                            <SelectTrigger className="mt-2">
+                                                <SelectValue placeholder="Select branch" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {ENGINEERING_BRANCHES.map(branch => (
+                                                    <SelectItem key={branch} value={branch}>{branch}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                {/* Semester Selection */}
+                                <div>
+                                    <label className="text-sm font-medium">Semester</label>
+                                    <Select
+                                        value={engineeringData.semester}
+                                        onValueChange={(value) => setEngineeringData(prev => ({ ...prev, semester: value, subject: "" }))}
+                                    >
+                                        <SelectTrigger className="mt-2">
+                                            <SelectValue placeholder="Select semester" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {SEMESTERS.map(sem => (
+                                                <SelectItem key={sem} value={sem}>{sem}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Subject Selection */}
+                                <div>
+                                    <label className="text-sm font-medium">Select Subject</label>
+                                    <p className="text-xs text-muted-foreground mb-2">Choose from available subjects</p>
+                                    {!engineeringData.branch || !engineeringData.semester ? (
+                                        <div className="text-center py-8 border rounded-lg bg-muted/20">
+                                            <p className="text-sm text-muted-foreground">Select branch and semester to view subjects</p>
+                                        </div>
+                                    ) : availableSubjects.length === 0 ? (
+                                        <div className="text-center py-8 border rounded-lg bg-muted/20">
+                                            <p className="text-sm text-muted-foreground">No subjects available</p>
+                                        </div>
+                                    ) : (
+                                        <div className="max-h-48 overflow-y-auto border rounded-lg p-2 bg-muted/10">
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {availableSubjects.map(subject => (
+                                                    <button
+                                                        key={subject}
+                                                        type="button"
+                                                        onClick={() => setEngineeringData(prev => ({ ...prev, subject: subject }))}
+                                                        className={`text-xs px-2.5 py-1.5 rounded-md transition-all ${
+                                                            engineeringData.subject === subject
+                                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                                                : "bg-background hover:bg-accent border"
+                                                        }`}
+                                                    >
+                                                        {subject}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <Separator />
+
+                                {/* Modules Section */}
+                                <div>
+                                    <label className="text-sm font-medium">Course Modules</label>
+                                    <p className="text-xs text-muted-foreground mb-3">Define the topics/modules for this subject</p>
+                                    <div className="space-y-2">
+                                        {engineeringData.modules.map((module, index) => (
+                                            <div key={index} className="flex gap-2">
+                                                <Input
+                                                    placeholder={`Module ${index + 1}`}
+                                                    value={module}
+                                                    onChange={(e) => updateModule(index, e.target.value)}
+                                                    className="flex-1"
+                                                />
+                                                {engineeringData.modules.length > 1 && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => removeModule(index)}
+                                                    >
+                                                        ×
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={addModule}
+                                        className="mt-2"
+                                    >
+                                        + Add Module
+                                    </Button>
+                                </div>
+
+                                {/* PDF Upload */}
+                                <div>
+                                    <label className="text-sm font-medium">Syllabus PDF (Optional)</label>
+                                    <Input
+                                        type="file"
+                                        accept=".pdf"
+                                        onChange={(e) => setEngineeringData(prev => ({ ...prev, pdfFile: e.target.files[0] }))}
+                                        className="mt-2"
+                                    />
+                                </div>
+
+                                <Button
+                                    onClick={handleEngineeringSubmit}
+                                    className="w-full"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? "Generating Course..." : "Generate Engineering Course"}
+                                </Button>
+                            </div>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );

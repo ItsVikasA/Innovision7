@@ -126,6 +126,37 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Accessibility */
+  .high-contrast {
+    filter: contrast(2);
+  }
+  
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  *:focus-visible {
+    outline: 3px solid #0066cc;
+    outline-offset: 2px;
+  }
+  
+  .skip-to-content {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    z-index: 100;
+  }
+  
+  .skip-to-content:focus {
+    top: 0;
+  }
 }
 
 .samp{
@@ -166,3 +197,5 @@ body {
   padding: 5px;
   border-radius: 5px;
 }
+
+/* Accessibility Features */

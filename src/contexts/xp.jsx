@@ -1,37 +1,52 @@
 "use client";
 
 import { createContext, useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 const xpContext = createContext();
 
 export const XpProvider = ({ children }) => {
+    const { data: session } = useSession();
     const [xp, setXp] = useState(0);
     const [show, setShow] = useState(false);
-    const [changed, setChanged] = useState(0)
+    const [changed, setChanged] = useState(0);
 
     async function change() {
-        setShow(true)
+        setShow(true);
         setTimeout(() => {
-            setShow(false)
-            setChanged(0)
+            setShow(false);
+            setChanged(0);
         }, 800);
     }
 
     async function getXp() {
-        const res = await fetch("/api/getuser");
-        const data = await res.json();
+        if (!session?.user?.email) return;
         
-        setChanged(data.xp - xp)
-        setXp(data.xp);
-        change()
+        try {
+            const res = await fetch(`/api/gamification/stats?userId=${session.user.email}`);
+            const data = await res.json();
+            
+            if (data && typeof data.xp === 'number') {
+                const xpDiff = data.xp - xp;
+                if (xpDiff > 0) {
+                    setChanged(xpDiff);
+                    change();
+                }
+                setXp(data.xp);
+            }
+        } catch (error) {
+            console.error("Error fetching XP:", error);
+        }
     }
 
     useEffect(() => {
-        getXp();
-    }, []);
+        if (session?.user?.email) {
+            getXp();
+        }
+    }, [session]);
 
     return (
-        <xpContext.Provider value={{ getXp, xp , show, changed}}>
+        <xpContext.Provider value={{ getXp, xp, show, changed }}>
             {children}
         </xpContext.Provider>
     );

@@ -21,7 +21,12 @@ const thoughts = [
 const Page = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [text, setText] = useState(thoughts[Math.floor(Math.random() * 10)]);
+  const [text, setText] = useState("Loading...");
+
+  useEffect(() => {
+    // Set random thought only on client side to avoid hydration mismatch
+    setText(thoughts[Math.floor(Math.random() * 10)]);
+  }, []);
 
   useEffect(() => {
     if (status === "authenticated") {
