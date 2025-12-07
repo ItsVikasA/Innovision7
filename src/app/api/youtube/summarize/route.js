@@ -7,7 +7,7 @@ export async function POST(request) {
   try {
     const { title, transcript } = await request.json();
     
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     const prompt = `Analyze this video transcript and create a chapter-wise summary:
 

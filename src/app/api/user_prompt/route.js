@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 import { auth } from "@/app/auth";
 import { db } from "@/lib/firebase";
 import {
@@ -13,7 +12,19 @@ import {
   where,
 } from "firebase/firestore";
 import { nanoid } from "nanoid";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
+/* -------------------------------
+   Initialize Gemini Client
+--------------------------------*/
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.0-flash",
+});
+
+/* -------------------------------
+   Database Updating with Retry
+--------------------------------*/
 async function updateDatabase(details, id, user, retries = 3) {
   const docRef = doc(db, "users", user.email, "roadmaps", id);
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -28,42 +39,47 @@ async function updateDatabase(details, id, user, retries = 3) {
   }
 }
 
-export const openai = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-});
-
+/* -------------------------------
+   Clean JSON Parsing
+--------------------------------*/
 function parseJson(response) {
   try {
-    const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[1]);
-    }
     return JSON.parse(response);
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
+  } catch (err) {
+    console.error("JSON parse error:", err);
     return { error: true };
   }
 }
 
+/* -------------------------------
+   Gemini Prompt Generation
+--------------------------------*/
 async function generateRoadmap(prompt, id, session, user_prompt) {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gemini-1.5-flash",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Act as a structured roadmap generator. Create a chapter-wise learning path for [CONCEPT] with these requirements: Format: Strictly return valid JSON (no markdown) with camelCase keys, never include backticks, '```json'. The json must contain the CourseTitle, CourseDescription, and each chapter must contain: chapterNumber (integer), chapterTitle (concise), chapterDescription (1 sentence), learningObjectives, contentOutline. Style: Learning objectives start with action verbs (Analyze, Implement, Compare). Avoid vague terms - focus on measurable outcomes. Prioritize logical progression from foundational to advanced topics.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
+    const geminiResponse = await model.generateContent(`
+SYSTEM:
+Act as a structured roadmap generator. Create a chapter-wise learning path for [CONCEPT] with these exact rules:
+1. Strictly return VALID JSON (no markdown, no backticks).
+2. Use camelCase keys.
+3. Must include:
+   - courseTitle
+   - courseDescription
+   - chapters[] → each containing:
+     - chapterNumber (integer)
+     - chapterTitle
+     - chapterDescription (1 sentence)
+     - learningObjectives[]
+     - contentOutline[]
+4. Learning objectives MUST start with action verbs (Analyze, Compare, Implement, etc.)
+5. Logical progression: basic → advanced.
 
-    const parsedResponse = parseJson(response.choices[0]?.message?.content);
+USER:
+${prompt}
+    `);
+
+    const text = geminiResponse.response.text();
+    const parsedResponse = parseJson(text);
+
     if (parsedResponse.error) {
       await updateDatabase(
         {
@@ -80,6 +96,7 @@ async function generateRoadmap(prompt, id, session, user_prompt) {
       user_prompt.difficulty === "in-depth"
         ? "inDepth"
         : user_prompt.difficulty;
+
     await updateDoc(doc(db, "users", session.user.email), {
       [`roadmapLevel.${difficulty}`]: increment(1),
     });
@@ -96,6 +113,7 @@ async function generateRoadmap(prompt, id, session, user_prompt) {
     );
   } catch (error) {
     console.error("Error generating roadmap:", error);
+
     await updateDatabase(
       {
         message: "There was an error while generating your roadmap.",
@@ -107,6 +125,9 @@ async function generateRoadmap(prompt, id, session, user_prompt) {
   }
 }
 
+/* -------------------------------
+   Check Eligibility
+--------------------------------*/
 async function checkEligible(session) {
   try {
     const q = query(
@@ -116,12 +137,14 @@ async function checkEligible(session) {
     const querySnapshot = await getDocs(q);
     return querySnapshot.size <= 6;
   } catch (error) {
-    console.error("Error checking eligibility:", error);
+    console.error("Eligibility check failed:", error);
     return false;
   }
 }
 
-// POST request to generate the roadmap
+/* -------------------------------
+   POST Handler
+--------------------------------*/
 export async function POST(req) {
   const user_prompt = await req.json();
   const session = await auth();
@@ -131,20 +154,18 @@ export async function POST(req) {
   }
 
   if (user_prompt?.prompt.length > 800) {
-    console.log(user_prompt?.prompt.length);
-
     return NextResponse.json(
-      {
-        message: "The given prompt is beyond maximum character length.",
-      },
+      { message: "The given prompt is beyond maximum character length." },
       { status: 400 }
     );
   }
 
   try {
     const roadmapId = nanoid(20);
+
     await updateDatabase({ process: "pending" }, roadmapId, session.user);
 
+    // background processing
     setTimeout(
       () =>
         generateRoadmap(user_prompt.prompt, roadmapId, session, user_prompt),
@@ -164,7 +185,7 @@ export async function POST(req) {
       { status: 202 }
     );
   } catch (error) {
-    console.error("Error in roadmap generation:", error);
+    console.error("Internal error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

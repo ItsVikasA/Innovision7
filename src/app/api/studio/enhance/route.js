@@ -7,7 +7,7 @@ export async function POST(request) {
   try {
     const { content, title } = await request.json();
     
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     const prompt = `Enhance this educational content to make it more engaging and clear. Keep the same structure but improve:
 - Clarity and readability

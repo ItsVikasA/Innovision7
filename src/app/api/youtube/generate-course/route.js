@@ -9,7 +9,7 @@ export async function POST(request) {
   try {
     const { title, summary, transcript } = await request.json();
     
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     const prompt = `Create a detailed course from this YouTube video:
 
