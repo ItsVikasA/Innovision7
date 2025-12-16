@@ -223,10 +223,7 @@ We welcome contributions! Please follow these steps:
 ![Learning Interface](https://github.com/user-attachments/assets/4f89132f-5a85-4628-9b76-72761dec8508)
 ![Progress Tracking](https://github.com/user-attachments/assets/f81ff3d9-44ce-4c34-b45c-e9bdb02ce588) -->
 
-## 🔗 Links
 
-- **Live Demo**: [https://InnoVision.vercel.app](https://InnoVision2.vercel.app)
-- **Repository**: [https://github.com/ItsVikasA/Innovision2](https://github.com/ItsVikasA/Innovision2)
 
 ## 📄 License
 
