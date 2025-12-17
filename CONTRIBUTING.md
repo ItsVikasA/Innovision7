@@ -1,8 +1,8 @@
-# Contributing to InnoVision 🎯
+# Contributing to InnoVision
 
 Thank you for your interest in contributing to InnoVision! We welcome contributions from developers of all skill levels. This guide will help you get started.
 
-## 🌟 How to Contribute
+##  How to Contribute
 
 ### 1. Fork and Clone
 
@@ -104,7 +104,7 @@ Commit message format:
    - Screenshots/GIFs for UI changes
    - Testing steps
 
-## 🐛 Reporting Bugs
+##  Reporting Bugs
 
 If you find a bug, please create an issue with:
 - Clear, descriptive title
@@ -113,7 +113,7 @@ If you find a bug, please create an issue with:
 - Screenshots if applicable
 - Environment details (OS, browser, Node version)
 
-## 💡 Suggesting Features
+##  Suggesting Features
 
 For feature requests:
 - Check if the feature already exists or is planned
@@ -121,35 +121,35 @@ For feature requests:
 - Explain use cases
 - Include mockups or examples if possible
 
-## 📝 Code of Conduct
+##  Code of Conduct
 
 - Be respectful and inclusive
 - Provide constructive feedback
 - Help others learn and grow
 - Keep discussions professional
 
-## 🔍 Review Process
+##  Review Process
 
 1. Maintainers will review your PR
 2. Address any requested changes
 3. Once approved, your PR will be merged
 4. Your contribution will be credited
 
-## 🆘 Need Help?
+##  Need Help?
 
 - Check the [README.md](README.md) for setup instructions
 - Review existing issues and PRs
 - Ask questions in issue comments
 - Reach out to maintainers
 
-## 📚 Additional Resources
+##  Additional Resources
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React Documentation](https://react.dev)
 - [Tailwind CSS](https://tailwindcss.com/docs)
 - [Firebase Docs](https://firebase.google.com/docs)
 
-## 🎉 Thank You!
+##  Thank You!
 
 Every contribution, no matter how small, helps make InnoVision better. We appreciate your time and effort!
 
