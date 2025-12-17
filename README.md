@@ -2,37 +2,37 @@
 
 ![InnoVision Logo](./public/InnoVision_LOGO-removebg-preview.png)
 
-## 📚 Introduction
+##  Introduction
 
 InnoVision is committed to revolutionizing education through intelligent and personalized learning. Our platform breaks the limitations of traditional courses by dynamically generating structured, engaging courses from any user-defined topic. By leveraging AI and machine learning, we create a flexible and adaptive learning environment that tailors content to individual needs.
 
 With innovation, flexibility, and logical reasoning (InnoVision) as our core principles, we are shaping the future of personalized learning!
 
-## ✨ Features
+##  Features
 
-- **🎯 Dynamic Course Generation**: Users can input any concept, skill, or topic, and the system will generate a structured course
-- **🤖 AI-Powered Learning Paths**: Uses Large Language Models (LLM) to create step-by-step roadmaps, organizing content into chapters
-- **🎮 Interactive Task Implementation**: Platform integrates various interactive task templates (Quiz, Fill-ups, Match) to enhance engagement
-- **⚡ Automated Task Selection**: AI selects the most suitable interactive tasks for each chapter, ensuring optimized learning experience
-- **📋 Structured JSON Parsing**: Course content is formatted in JSON and seamlessly parsed to generate complete, customized courses
-- **🔄 Adaptive Learning Experience**: Courses adjust based on user input, ensuring flexible and tailored learning journeys
-- **👤 User Authentication**: Secure login with Google and GitHub OAuth
-- **📊 Progress Tracking**: Track learning progress, XP points, and achievements
-- **📧 Contact System**: Integrated contact form with EmailJS for user communication
+- ** Dynamic Course Generation**: Users can input any concept, skill, or topic, and the system will generate a structured course
+- ** AI-Powered Learning Paths**: Uses Large Language Models (LLM) to create step-by-step roadmaps, organizing content into chapters
+- ** Interactive Task Implementation**: Platform integrates various interactive task templates (Quiz, Fill-ups, Match) to enhance engagement
+- ** Automated Task Selection**: AI selects the most suitable interactive tasks for each chapter, ensuring optimized learning experience
+- ** Structured JSON Parsing**: Course content is formatted in JSON and seamlessly parsed to generate complete, customized courses
+- ** Adaptive Learning Experience**: Courses adjust based on user input, ensuring flexible and tailored learning journeys
+- ** User Authentication**: Secure login with Google and GitHub OAuth
+- ** Progress Tracking**: Track learning progress, XP points, and achievements
+- ** Contact System**: Integrated contact form with EmailJS for user communication
 
 ## 🛠️ Technologies Used
 
-- **⚡ Next.js 15** - React framework with App Router for optimal performance and SEO
-- **🎨 Tailwind CSS** - Utility-first CSS framework for responsive design
-- **🎭 Shadcn/UI** - Modern and accessible UI component library
-- **🔥 Firebase** - Backend services for database management and real-time data
-- **🔐 Auth.js (NextAuth v5)** - Secure authentication with OAuth providers
-- **🤖 Google Gemini API** - AI-powered content generation
-- **📧 EmailJS** - Contact form email service
-- **🎯 React Icons** - Comprehensive icon library
-- **📱 Framer Motion** - Animation library for smooth interactions
+- ** Next.js 15** - React framework with App Router for optimal performance and SEO
+- ** Tailwind CSS** - Utility-first CSS framework for responsive design
+- ** Shadcn/UI** - Modern and accessible UI component library
+- ** Firebase** - Backend services for database management and real-time data
+- ** Auth.js (NextAuth v5)** - Secure authentication with OAuth providers
+- ** Google Gemini API** - AI-powered content generation
+- ** EmailJS** - Contact form email service
+- ** React Icons** - Comprehensive icon library
+- ** Framer Motion** - Animation library for smooth interactions
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -40,7 +40,7 @@ With innovation, flexibility, and logical reasoning (InnoVision) as our core pri
 - npm, yarn, pnpm, or bun
 - Git
 
-### 📥 Installation
+###  Installation
 
 1. **Clone the repository**
    ```bash
@@ -105,9 +105,9 @@ With innovation, flexibility, and logical reasoning (InnoVision) as our core pri
    
    Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
-## 🔧 Environment Variables Setup Guide
+##  Environment Variables Setup Guide
 
-### 🔑 Authentication Setup
+###  Authentication Setup
 
 #### NextAuth Secret
 Generate a secure random string:
@@ -128,7 +128,7 @@ openssl rand -base64 32
 4. Create OAuth 2.0 credentials
 5. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
 
-### 🔥 Firebase Setup
+###  Firebase Setup
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Create a new project
 3. Add a web app to your project
@@ -136,18 +136,18 @@ openssl rand -base64 32
 5. Enable Firestore Database
 6. Set up authentication methods
 
-### 🤖 Google Gemini API
+###  Google Gemini API
 1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Create an API key
 3. Copy the key for `GEMINI_API_KEY`
 
-### 📧 EmailJS Setup
+###  EmailJS Setup
 1. Go to [EmailJS](https://www.emailjs.com/)
 2. Create an account and add an email service
 3. Create an email template
 4. Get Service ID, Template ID, and User ID from dashboard
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 InnoVision/
@@ -175,7 +175,7 @@ InnoVision/
 └── README.md               # This file
 ```
 
-## 🔨 Available Scripts
+##  Available Scripts
 
 ```bash
 # Development
@@ -189,7 +189,7 @@ npm run start        # Start production server
 npm run lint         # Run ESLint
 ```
 
-## 🌐 Deployment
+##  Deployment
 
 ### Vercel (Recommended)
 1. Push your code to GitHub
@@ -204,7 +204,7 @@ The app can be deployed on any platform that supports Next.js:
 - DigitalOcean App Platform
 - AWS Amplify
 
-## 🤝 Contributing
+##  Contributing
 
 We welcome contributions! Please follow these steps:
 
@@ -214,7 +214,7 @@ We welcome contributions! Please follow these steps:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📸 Screenshots
+##  Screenshots
 
 <!-- Website Photos -->
 <!-- ![Homepage](https://github.com/user-attachments/assets/0ebba6e1-5eb7-4e40-b6ff-747607d1219c)
@@ -225,11 +225,11 @@ We welcome contributions! Please follow these steps:
 
 
 
-## 📄 License
+##  License
 
 This project is licensed under the ISC License.
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - Google Gemini API for AI capabilities
 - Shadcn/UI for beautiful components
